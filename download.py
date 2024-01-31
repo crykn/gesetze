@@ -40,38 +40,28 @@ for act in acts:
 
                     statute_abbreviation = metadata_element.find('jurabk').text # GG
 
-                    if provision_name_element is None:
-                        langue_element = metadata_element.find('langue')
-                        '''
-                        if langue_element is not None: # The introductory element
-                            print(metadata_element.find('langue').text)  # Grundgesetz für die Bundesrepublik Deutschland
-                            for last_updated_element in metadata_element.findall('standangabe'):
-                                print(last_updated_element.find('standkommentar').text)  # Zuletzt geändert durch Art. 1 G v. 19.12.2022 I 2478
-                            # 'textdaten.text.Content' can contain a list (DL, DT, DD, LA) of directives which were implemented by the act
+                    if provision_name_element is not None: # Each provision, including the Eingangsformel, the Präambel, the Inhaltsübersicht and the Anhang EV
+                        provision_number = provision_name_element.text.replace("Art ", "Art. ")  # Art. 1
+                        provision_name = provision_number 
 
-                        else: # A title element
-                            level_element = metadata_element.find('gliederungseinheit')
-                            print(level_element.find('gliederungskennzahl')) # 010
-                            print(level_element.find('gliederungsbez')) # I.
-                            print(level_element.find('gliederungstitel')) # Die Grundrechte
-                        '''
-                    else:  # Each provision, including the Eingangsformel, the Präambel, the Inhaltsübersicht and the Anhang EV
-                        provision_name = provision_name_element.text.replace("Art ", "Art. ")  # Art 1
+                        title_element = metadata_element.find('titel')
+                        if  title_element is not None:
+                            provision_name += " " + title_element.text
 
-                        if provision_name == "Eingangsformel" or provision_name == "Präambel" or provision_name == "Anhang EV" or provision_name == "Inhaltsübersicht":
+                        if provision_number == "Eingangsformel" or provision_number == "Präambel" or provision_number == "Anhang EV" or provision_number == "Inhaltsübersicht":
                             continue
 
-                        if "(XXXX)" in provision_name: # provision is no longer in force
+                        if "(XXXX)" in provision_number: # provision is no longer in force
                             continue
 
                         # Open file
-                        new_path = os.path.join('dist/' + act + '/', provision_name.replace("§ ", "").replace("Art. ", "") + '.html')
+                        new_path = os.path.join('dist/' + act + '/', provision_number.replace("§ ", "").replace("Art. ", "") + '.html')
                         os.makedirs(os.path.dirname(new_path), exist_ok=True)
                         f = open(new_path, "w", encoding="utf-8")
 
                         # Write to file
                         provision_text = to_html_text(textdata_element.find('text').find('Content')) # <P>(1) Die Würde...</P><P>(2) Das Deutsche Volk...</P><P>(3) Die nachfolgenden...</P>
-                        f.write("<div class='provision_title'>" + provision_name + " " + statute_abbreviation + "</div>\n<div class='provision_text'>" + provision_text + "</div>")
+                        f.write("<div class='provision_title'>" + provision_name + "</div>\n<div class='provision_text'>" + provision_text + "</div>")
 
                         footnote_element = textdata_element.find('fussnoten')
                         if footnote_element is not None:
