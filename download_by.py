@@ -58,7 +58,7 @@ for act in acts:
 
                         absatz_nr_element = absatz_element.find('absatz.nr')
                         if absatz_nr_element is not None:
-                            provision_text += absatz_nr_element.text
+                            provision_text += absatz_nr_element.text + " "
                         provision_text += to_html_text(absatz_element.find('absatz.text')).replace("<p>", "", 1)
 
                     if no_longer_in_force:
